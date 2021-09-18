@@ -1,0 +1,24 @@
+id='texinfo'
+version='6.6'
+release='1'
+about='GNU documentation system for on-line information and printed output'
+license='GPL3'
+runtime=('gzip' 'ncurses' 'perl' 'bash')
+source=("$YSRC_URL/$id-$version.tar.xz")
+
+build() {
+	cd $id-$version
+	./configure --prefix=/usr --disable-static
+
+	make
+	make check||true
+	make DESTDIR=$pkgdir install 
+	make TEXMF=$pkgdir/usr/share/texmf install-tex
+
+	pushd $pkgdir/usr/share/info
+	rm -v dir
+	for f in *
+	  do install-info $f dir 2>/dev/null
+	done
+	popd
+}

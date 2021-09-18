@@ -1,0 +1,22 @@
+id='libffi'
+version='3.2.1'
+release='1'
+about='Handle ELF object files and DWARF debugging information (utilities)'
+license='GPL3'
+url=''
+runtime=('glibc')
+source=("$YSRC_URL/$id-$version.tar.gz")
+
+build() {
+    cd $id-$version
+    sed -e '/^includesdir/ s/$(libdir).*$/$(includedir)/' \
+      -i include/Makefile.in
+
+    sed -e '/^includedir/ s/=.*$/=@includedir@/' \
+      -e 's/^Cflags: -I${includedir}/Cflags:/' \
+      -i libffi.pc.in
+    ./configure --prefix=/usr --disable-static --with-gcc-arch=native
+    make
+    make check||true
+    make DESTDIR=$pkgdir install
+}

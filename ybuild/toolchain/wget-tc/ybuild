@@ -1,0 +1,22 @@
+id='wget-tc'
+orgid='wget'
+version="$WGET_VERSION"
+release='1'
+source=("http://35.154.131.43/ysarchives/1.0/NET/$orgid-$version.tar.gz")
+
+skippack=1
+
+build() {
+	cd $orgid-$version
+
+	./configure \
+		--prefix=/tools \
+		--sysconfdir=/tools/etc \
+		--with-ssl=openssl \
+		--without-zlib \
+		--without-libpsl \
+		--disable-pcre2
+
+	make
+	make install
+}

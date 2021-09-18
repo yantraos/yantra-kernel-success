@@ -1,0 +1,17 @@
+id='groff'
+version='1.22.4'
+release='1'
+about='GNU troff text-formatting system'
+license='GPL3'
+runtime=('gcc' 'perl')
+source=("$YSRC_URL/$id-$version.tar.gz")
+
+build() {
+    cd $id-$version
+
+    PAGE=A4 ./configure --prefix=/usr
+
+    make -j1||true
+    make DESTDIR=$pkgdir install
+    
+}

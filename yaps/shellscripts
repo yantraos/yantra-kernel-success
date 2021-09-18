@@ -1,0 +1,6 @@
+-z : check if variable is not defined
+-f : check if file exist
+-d : check if dir exist 
+-L : check if link exist
+-e : check if exist
+-x : check if path/file is executable

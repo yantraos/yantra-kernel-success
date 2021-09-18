@@ -1,0 +1,17 @@
+id='make'
+version='4.2.1'
+release='1'
+about='GNU make utility to maintain groups of programs'
+license='GPL3'
+runtime=('glibc')
+source=("$YSRC_URL/$id-$version.tar.gz")
+
+build() {
+    cd $id-$version
+    sed -i '211,217 d; 219,229 d; 232 d' glob/glob.c
+    ./configure --prefix=/usr
+    make
+    make PERL5LIB=$PWD/tests/ check||true
+    make DESTDIR=$pkgdir install 
+
+}

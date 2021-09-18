@@ -1,0 +1,18 @@
+id='tar'
+version='1.32'
+release='1'
+about='Utility used to store, backup, and transport files'
+license='GPL3'
+runtime=('acl' 'attr' 'glibc')
+source=("$YSRC_URL/$id-$version.tar.xz")
+
+build() {
+	cd $id-$version
+	FORCE_UNSAFE_CONFIGURE=1  \
+	./configure --prefix=/usr \
+		    --bindir=/bin
+	make
+	make check||true
+	make DESTDIR=$pkgdir install 
+	make -C doc install-html docdir=$pkgdir/usr/share/doc/$id-$version
+}

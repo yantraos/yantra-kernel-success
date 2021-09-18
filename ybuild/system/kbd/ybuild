@@ -1,0 +1,22 @@
+id='kbd'
+version='2.2.0'
+release='1'
+about='Keytable files and keyboard utilities'
+license='GPL3'
+runtime=('glibc')
+source=("$YSRC_URL/$id-$version.tar.xz $YSRC_URL/$id-$version-backspace-1.patch")
+
+build() {
+    mkdir -p $pkgdir/usr/share/doc
+    cd $id-$version    
+    patch -Np1 -i ../$id-$version-backspace-1.patch
+    sed -i 's/\(RESIZECONS_PROGS=\)yes/\1no/g' configure
+    sed -i 's/resizecons.8 //' docs/man/man8/Makefile.in
+    PKG_CONFIG_PATH=/tools/lib/pkgconfig ./configure --prefix=/usr --disable-vlock
+    make
+    make check
+    make DESTDIR=$pkgdir install 
+
+    mkdir -v   $pkgdir/usr/share/doc/$id-$version
+    cp -R -v docs/doc/* $pkgdir/usr/share/doc/$id-$version
+}

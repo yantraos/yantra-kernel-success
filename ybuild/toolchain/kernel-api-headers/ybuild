@@ -1,0 +1,13 @@
+id='kernel-api-headers'
+orgid='linux'
+version="$LINUX_VERSION"
+release='1'
+source=("$YSRC_URL/linux-${version}.tar.xz")
+skippack=1
+
+build() {
+	cd $orgid-$version
+	
+	make INSTALL_HDR_PATH=dest headers_install
+	cp -rv dest/include/* /tools/include
+}

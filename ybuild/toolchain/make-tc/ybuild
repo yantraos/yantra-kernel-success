@@ -1,0 +1,22 @@
+id='make-tc'
+orgid='make'
+version="$MAKE_VERSION"
+release='1'
+source=("$YSRC_URL/$orgid-$version.tar.gz")
+
+skippack=1
+
+build() {
+	cd $orgid-$version
+
+	sed -i '211,217 d; 219,229 d; 232 d' glob/glob.c
+
+	./configure \
+		--prefix=/tools \
+		--without-guile
+
+	make
+
+	make check || true
+	make install
+}

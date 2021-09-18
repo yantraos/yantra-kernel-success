@@ -1,0 +1,23 @@
+id='mpfr'
+version='4.0.2'
+release='1'
+about='Multiple-precision floating-point library'
+license='GPL3'
+runtime=('gmp')
+source=("$YSRC_URL/$id-$version.tar.xz")
+
+build() {
+    cd $id-$version
+
+    ./configure --prefix=/usr     \
+            --disable-static     \
+            --enable-thread-safe \
+            --docdir=/usr/share/doc/mpfr-4.0.2
+    make
+    make html
+
+    make check
+
+    make DESTDIR=$pkgdir install
+    make DESTDIR=$pkgdir install-html
+}

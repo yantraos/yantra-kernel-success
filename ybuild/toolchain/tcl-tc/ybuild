@@ -1,0 +1,24 @@
+id='tcl-tc'
+orgid='tcl'
+version="$TCL_VERSION"
+release='1'
+source=("$YSRC_URL/$orgid$version-src.tar.gz")
+
+skippack=1
+
+build() {
+	cd $orgid$version/unix
+
+	./configure --prefix=/tools
+
+	make
+	
+	TZ=UTC make test
+
+	make install
+
+	chmod -v u+w /tools/lib/libtcl8.6.so
+	make install-private-headers
+
+	ln -sv tclsh8.6 /tools/bin/tclsh
+}

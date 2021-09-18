@@ -1,0 +1,19 @@
+id='sed-tc'
+orgid='sed'
+version="$SED_VERSION"
+release='1'
+source=("$YSRC_URL/$orgid-$version.tar.xz")
+
+skippack=1
+
+build() {
+	cd $orgid-$version
+
+	./configure \
+		--prefix=/tools
+
+	make
+
+#	make check
+	make install
+}

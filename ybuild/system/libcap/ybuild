@@ -1,0 +1,22 @@
+id='libcap'
+version='2.27'
+release='1'
+about='POSIX 1003.1e capabilities'
+license='GPL3'
+runtime=('glibc')
+source=("$YSRC_URL/$id-$version.tar.xz")
+
+build() {
+    mkdir -vp  $pkgdir/lib||true
+
+    cd $id-$version
+    sed -i '/install.*STALIBNAME/d' libcap/Makefile
+    make 
+    make RAISE_SETFCAP=no lib=lib prefix=/usr DESTDIR=$pkgdir install
+    chmod -v 755 $pkgdir/usr/lib/libcap.so
+    chmod -v 755 $pkgdir/usr/lib/libcap.so.2.27
+    
+    mv -v $pkgdir/usr/lib/libcap.so.* $pkgdir/lib
+    ln -sfv ../../lib/$(readlink $pkgdir/usr/lib/libcap.so) $pkgdir/usr/lib/libcap.so
+    ln -sfv libcap.so $pkgdir/usr/lib/libcap.so.2
+}

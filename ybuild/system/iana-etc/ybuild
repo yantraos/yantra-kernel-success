@@ -1,0 +1,16 @@
+id='iana-etc'
+version='2.30'
+release='1'
+about='/etc/protocols and /etc/services provided by IANA'
+license='GPL3'
+runtime=('')
+source=("$YSRC_URL/$id-$version.tar.bz2")
+
+build() {
+    cd $id-$version
+
+    make
+
+    make DESTDIR=$pkgdir install
+
+}

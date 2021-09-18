@@ -1,0 +1,19 @@
+id='check'
+version='0.12.0'
+release='1'
+about='A unit testing framework for C'
+license='GPL3'
+runtime=('gawk')
+source=("$YSRC_URL/$id-$version.tar.gz")
+
+build() {
+    cd $id-$version
+
+    ./configure --prefix=/usr
+    make
+    make check||true
+    mkdir -vp $pkgdir/usr/bin
+    make DESTDIR=$pkgdir docdir=$pkgdir/usr/share/doc/$id-$version install
+    sed -i '1 s/tools/usr/' $pkgdir/usr/bin/checkmk
+
+}

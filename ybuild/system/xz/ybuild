@@ -1,0 +1,26 @@
+id='xz'
+version='5.2.4'
+release='1'
+about='Library and command line tools for XZ and LZMA compressed files'
+license='GPL3'
+runtime=('bash')
+source=("$YSRC_URL/$id-$version.tar.xz")
+
+build() {
+    mkdir -pv $pkgdir/bin $pkgdir/lib $pkgdir/usr/lib
+
+    cd $id-$version
+
+    ./configure --prefix=/usr    \
+            --disable-static \
+            --docdir=/usr/share/doc/$id-$version
+
+    make 
+    make  check
+    make DESTDIR=$pkgdir install 
+    
+    mv -v   $pkgdir/usr/bin/{lzma,unlzma,lzcat,xz,unxz,xzcat} $pkgdir/bin
+    mv -v $pkgdir/usr/lib/liblzma.so.* $pkgdir/lib
+    ln -svf ../../lib/$(readlink $pkgdir/usr/lib/liblzma.so) $pkgdir/usr/lib/liblzma.so
+    ln -svf liblzma.so $pkgdir/usr/lib/liblzma.so.5
+}

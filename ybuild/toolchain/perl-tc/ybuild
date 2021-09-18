@@ -1,0 +1,23 @@
+id='perl-tc'
+orgid='perl'
+version="$PERL_VERSION"
+release='1'
+source=("$YSRC_URL/$orgid-$version.tar.xz")
+
+skippack=1
+
+build() {
+	cd $orgid-$version
+
+	sh Configure \
+		-des \
+		-Dprefix=/tools \
+		-Dlibs=-lm \
+		-Uloclibpth \
+		-Ulocincpth
+
+	make
+	cp -v perl cpan/podlators/scripts/pod2man /tools/bin
+	mkdir -pv /tools/lib/perl5/$PERL_VERSION
+	cp -Rv lib/* /tools/lib/perl5/$PERL_VERSION
+}

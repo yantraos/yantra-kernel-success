@@ -1,0 +1,22 @@
+id='expat'
+version='2.2.7'
+release='1'
+about='An XML parser library.'
+license='GPL3'
+runtime=('glibc' 'cmake')
+source=("$YSRC_URL/$id-$version.tar.xz")
+
+build() {
+    cd $id-$version
+
+    sed -i 's|usr/bin/env |bin/|' run.sh.in
+    ./configure --prefix=/usr    \
+            --disable-static \
+            --docdir=/usr/share/doc/$id-$version
+    make 
+    make check||true
+    make DESTDIR=$pkgdir install 
+    install -v -m644 doc/*.{html,png,css} $pkgdir/usr/share/doc/$id-$version
+
+
+}

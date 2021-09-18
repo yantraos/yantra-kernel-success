@@ -1,0 +1,33 @@
+id='inetutils'
+version='1.9.4'
+release='1'
+about='The Inetutils package contains programs for basic networking.'
+license='GPL3'
+runtime=('perl-xml-parser')
+source=("$YSRC_URL/$id-$version.tar.xz")
+
+build() {
+    mkdir -vp $pkgdir/bin $pkgdir/sbin||true
+
+    cd $id-$version
+
+    ./configure --prefix=/usr        \
+            --localstatedir=/var \
+            --disable-logger     \
+            --disable-whois      \
+            --disable-rcp        \
+            --disable-rexec      \
+            --disable-rlogin     \
+            --disable-rsh        \
+            --disable-servers    
+    make 
+    make check||true
+    make DESTDIR=$pkgdir install 
+    
+    mv -v $pkgdir/usr/bin/{hostname,ping,ping6,traceroute} $pkgdir/bin
+    mv -v $pkgdir/usr/bin/ifconfig $pkgdir/sbin
+
+
+
+
+}

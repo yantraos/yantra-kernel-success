@@ -1,0 +1,18 @@
+id='automake'
+version='1.16.1'
+release='1'
+about='A GNU tool for automatically creating Makefiles'
+license='GPL3'
+runtime=(' 'bash' 'perl'  autoconf')
+source=("$YSRC_URL/$id-$version.tar.xz")
+
+build() {
+    cd $id-$version
+
+    ./configure --prefix=/usr --docdir=/usr/share/doc/$id-$version
+    make 
+    make -j4 check||true
+    make DESTDIR=$pkgdir install 
+
+
+}

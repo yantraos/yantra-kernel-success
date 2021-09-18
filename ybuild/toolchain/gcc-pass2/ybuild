@@ -1,0 +1,62 @@
+id='gcc-pass2'
+orgid='gcc'
+version="$GCC_VERSION"
+release='1'
+source=("$YSRC_URL/$orgid-$version.tar.xz"
+		"$YSRC_URL/mpfr-$MPFR_VERSION.tar.xz"
+		"$YSRC_URL/mpc-$MPC_VERSION.tar.gz"
+		"$YSRC_URL/gmp-$GMP_VERSION.tar.xz")
+
+skippack=1
+
+build() {
+	cd $orgid-$version
+
+	cat gcc/limitx.h gcc/glimits.h gcc/limity.h > \
+  `dirname $($YTGT-gcc -print-libgcc-file-name)`/include-fixed/limits.h
+	
+	mv $srcdir/mpfr-$MPFR_VERSION mpfr
+	mv $srcdir/mpc-$MPC_VERSION mpc
+	mv $srcdir/gmp-$GMP_VERSION gmp
+
+	for file in gcc/config/{linux,i386/linux{,64}}.h; do
+		cp -uv $file{,.orig}
+		sed -e 's@/lib\(64\)\?\(32\)\?/ld@/tools&@g' \
+			-e 's@/usr@/tools@g' $file.orig > $file
+		echo '
+		#undef STANDARD_STARTFILE_PREFIX_1
+		#undef STANDARD_STARTFILE_PREFIX_2
+		#define STANDARD_STARTFILE_PREFIX_1 "/tools/lib/"
+		#define STANDARD_STARTFILE_PREFIX_2 ""' >> $file
+		touch $file.orig
+	done
+	
+	case $(uname -m) in
+	x86_64)
+		sed -e '/m64=/s/lib64/lib/' \
+			-i.orig gcc/config/i386/t-linux64
+	;;
+	esac
+
+
+	mkdir -p build && cd build
+	
+	CC=$YTGT-gcc \
+	CXX=$YTGT-g++ \
+	AR=$YTGT-ar \
+	RANLIB=$YTGT-ranlib \
+	../configure	\
+		--prefix=/tools \
+		--with-local-prefix=/tools \
+		--with-native-system-header-dir=/tools/include \
+		--enable-languages=c,c++ \
+		--disable-libstdcxx-pch \
+		--disable-multilib \
+		--disable-bootstrap \
+		--disable-libgomp
+
+	make
+	make install
+
+	ln -sv gcc /tools/bin/cc
+}

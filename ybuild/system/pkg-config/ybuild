@@ -1,0 +1,19 @@
+id='pkg-config'
+version='0.29.2'
+release='1'
+about='Package compiler and linker metadata toolkit'
+license='GPL3'
+url=''
+runtime=('glibc' 'bash' )
+source=("$YSRC_URL/$id-$version.tar.gz")
+
+build() {
+    cd $id-$version
+    ./configure --prefix=/usr              \
+            --with-internal-glib           \
+            --disable-host-tool            \
+            --docdir=/usr/share/doc/$id-$version
+     make
+     make check
+     make DESTDIR=$pkgdir install
+}

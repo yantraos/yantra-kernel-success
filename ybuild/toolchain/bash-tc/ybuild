@@ -1,0 +1,25 @@
+id='bash-tc'
+orgid='bash'
+version="$BASH_VERSION"
+release='1'
+source=("$YSRC_URL/$orgid-$version.tar.gz")
+
+skippack=1
+
+build() {
+	cd $orgid-$version
+
+
+	./configure \
+		--prefix=/tools \
+		--without-bash-malloc
+
+	make
+
+	make tests
+
+	make install
+
+	ln -svf bash /tools/bin/sh 
+        ln -svf /tools/bin/bash /bin/sh
+}

@@ -1,0 +1,27 @@
+id='libstdc++-pass1'
+orgid='gcc'
+version="$GCC_VERSION"
+release='1'
+source=("$YSRC_URL/$orgid-$version.tar.xz")
+
+skippack=1
+
+build() {
+	cd $orgid-$version
+	
+	mkdir -p build && cd build
+	
+	../libstdc++-v3/configure	\
+		--prefix=/tools \
+		--host=$YTGT	\
+		--disable-multilib \
+		--disable-nls \
+		--disable-libstdcxx-threads \
+		--disable-libstdcxx-pch \
+		--with-gxx-include-dir=/tools/$YTGT/include/c++/$GCC_VERSION
+
+		
+	make
+	
+	make install
+}

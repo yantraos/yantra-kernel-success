@@ -1,0 +1,27 @@
+id='vim'
+version='8.1.1846'
+release='1'
+about='The Vim package contains a powerful text editor'
+license='GPL3'
+runtime=('acl' 'glibc' 'gpm' 'libffi' 'libcrypt' 'pcre' 'zlib')
+source=("$YSRC_URL/$id-$version.tar.gz")
+
+build() {
+	mkdir -p $pkgdir/usr/share/doc
+
+	cd $id-$version
+	echo '#define SYS_VIMRC_FILE "/etc/vimrc"' >> src/feature.h
+	SRCDIR=src
+	srcdir=$PWD/src
+	./configure --prefix=/usr 
+	make
+	chown -Rv nobody .
+	su nobody -s /bin/bash -c "LANG=en_US.UTF-8 make -j1 test" &> vim-test.log||true
+	make DESTDIR=$pkgdir install 
+	ln -sv vim $pkgdir/usr/bin/vi
+	for L in  $pkgdir/usr/share/man/{,*/}man1/vim.1; do
+	    ln -sv vim.1 $(dirname $L)/vi.1
+	done
+
+	ln -svf ../vim/vim81/doc $pkgdir/usr/share/doc/$id-$version
+}

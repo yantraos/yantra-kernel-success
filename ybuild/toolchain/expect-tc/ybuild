@@ -1,0 +1,26 @@
+id='expect-tc'
+orgid='expect'
+version="$EXPECT_VERSION"
+release='1'
+source=("$YSRC_URL/$orgid$version.tar.gz")
+
+skippack=1
+
+build() {
+	cd $orgid$version
+
+	cp -v configure{,.orig}
+
+	sed 's:/usr/local/bin:/bin:' configure.orig > configure
+
+	./configure \
+		--prefix=/tools \
+		--with-tcl=/tools/lib \
+		--with-tclinclude=/tools/include
+
+	make
+
+	make test
+
+	make SCRIPTS='' install
+}

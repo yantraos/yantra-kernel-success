@@ -1,0 +1,19 @@
+id='dejagnu-tc'
+orgid='dejagnu'
+version="$DEJAGNU_VERSION"
+release='1'
+source=("$YSRC_URL/$orgid-$version.tar.gz")
+
+skippack=1
+
+build() {
+	cd $orgid-$version
+
+
+	./configure \
+		--prefix=/tools
+
+	make install
+
+	make check
+}

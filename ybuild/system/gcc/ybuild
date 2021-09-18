@@ -1,0 +1,56 @@
+id='gcc'
+version='9.2.0'
+release='1'
+about='The GCC package contains the GNU compiler collection, which includes the C and C++ compilers.'
+license='GPL3'
+url=''
+runtime=('binutils' 'mpc')
+source=("$YSRC_URL/$id-$version.tar.xz")
+
+build() {
+	
+    cd $id-$version
+        case $(uname -m) in
+        x86_64)
+            sed -e '/m64=/s/lib64/lib/' \
+                -i.orig gcc/config/i386/t-linux64
+        ;;
+        esac
+
+        mkdir -v build
+        cd       build
+
+        SED=sed       
+                                
+        ../configure --prefix=/usr            \
+                    --enable-languages=c,c++ \
+                    --disable-multilib       \
+                    --disable-bootstrap      \
+                    --with-system-zlib
+        make
+   
+        ulimit -s 32768
+        chown -Rv nobody . 
+        su nobody -s /bin/bash -c "PATH=$PATH make -k check" ||true
+        ../contrib/test_summary
+        make install DESTDIR=$pkgdir
+        rm -f $pkgdir/usr/lib/$(gcc -dumpmachine)/${version}/include-fixed/bits||true
+        chown -v -R root:root $pkgdir/usr/lib/gcc/*linux-gnu/9.2.0/include{,-fixed}        
+	ln -sv ../usr/bin/cpp $pkgdir/lib
+        ln -sv gcc $pkgdir/usr/bin/cc
+        install -v -dm755 $pkgdir/usr/lib/bfd-plugins
+	ln -sfv ../../libexec/gcc/$(gcc -dumpmachine)/9.2.0/liblto_plugin.so $pkgdir/usr/lib/bfd-plugins/
+	echo 'int main(){}' > dummy.c
+	cc dummy.c -v -Wl,--verbose &> dummy.log
+	readelf -l a.out | grep ': /lib'
+        grep -o '/usr/lib.*/crt[1in].*succeeded' dummy.log
+	grep -B4 '^ /usr/include' dummy.log
+	grep 'SEARCH.*/usr/lib' dummy.log |sed 's|; |\n|g'
+	grep "/lib.*/libc.so.6 " dummy.log
+	grep found dummy.log
+	rm -v dummy.c a.out dummy.log||true
+	mkdir -pv $pkgdir/usr/share/gdb/auto-load/usr/lib||true
+	mv -v $pkgdir/usr/lib/*gdb.py $pkgdir/usr/share/gdb/auto-load/usr/lib
+
+}
+

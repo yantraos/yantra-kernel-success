@@ -1,0 +1,28 @@
+id='attr'
+version='2.4.48'
+release='1'
+about='Extended attribute support library for ACL support'
+license='GPL3'
+url=''
+runtime=('glibc' 'gettext')
+source=("$YSRC_URL/$id-$version.tar.gz")
+
+build() {
+    mkdir -p $pkgdir/lib
+
+    cd $id-$version
+
+    ./configure --prefix=/usr     \
+            --disable-static      \
+            --sysconfdir=/etc     \
+            --docdir=/usr/share/doc/$id-$version
+
+    make
+    make check||true
+    make DESTDIR=$pkgdir install
+    
+    mv -v $pkgdir/usr/lib/libattr.so.* $pkgdir/lib
+
+    ln -sfv ../../lib/$(readlink $pkgdir/usr/lib/libattr.so) $pkgdir/usr/lib/libattr.so
+    ln -sfv libattr.so $pkgdir/usr/lib/libattr.so.1
+}

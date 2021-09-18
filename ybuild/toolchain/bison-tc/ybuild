@@ -1,0 +1,20 @@
+id='bison-tc'
+orgid='bison'
+version="$BISON_VERSION"
+release='1'
+export nproc=20
+source=("$YSRC_URL/$orgid-$version.tar.xz")
+
+skippack=1
+
+build() {
+	cd $orgid-$version
+
+
+	./configure --prefix=/tools
+
+	make -j 1
+	
+	make install
+
+}

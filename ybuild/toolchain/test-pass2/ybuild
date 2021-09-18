@@ -1,0 +1,15 @@
+id='test-pass2'
+version='0.1.0'
+release='1'
+skippack=1
+
+build() {
+    echo 'int main() {}' > dummy.c
+    cc dummy.c
+    output=$(readelf -l a.out | grep ': /tools' | xargs)
+    
+    echo "checking version"
+    [[ "${output}" == '[Requesting program interpreter: /tools/lib64/ld-linux-x86-64.so.2]' ]]
+
+    rm dummy.c a.out
+}

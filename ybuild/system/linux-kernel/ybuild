@@ -1,0 +1,28 @@
+id='linux-kernel'
+orgid='linux'
+version='5.2.8'
+release='1'
+about=''
+source=("$YSRC_URL/linux-${version}.tar.xz")
+
+build() {
+	cd $orgid-$version
+
+        mkdir -vp $pkgdir/boot $pkgdir/usr/src||true
+
+	make mrproper
+
+        make menuconfig
+        
+        make
+        
+        make modules_install
+        
+        cp -iv arch/x86/boot/bzImage $pkgdir/boot/vmlinuz-5.2.8
+        cp -iv System.map $pkgdir/boot/System.map-5.2.8
+        cp -iv .config $pkgdir/boot/config-5.2.8
+        install -d $pkgdir/usr/share/doc/linux-5.2.8
+        cp -r Documentation/* $pkgdir/usr/share/doc/linux-5.2.8
+
+
+}

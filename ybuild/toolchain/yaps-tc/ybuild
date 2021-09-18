@@ -1,0 +1,17 @@
+id='yaps-tc'
+orgid='yaps'
+version="$YAPS_VERSION"
+release='1'
+source=("$YSRC_URL/$orgid-manjeet-$version.tar.gz")
+
+skippack=1
+
+build() {
+	cd $orgid-manjeet-$version
+
+	# toolchain patch
+	for i in *.sh ; do
+		sed -i 's|#!/bin/bash|#!/tools/bin/bash|g' $i
+	done
+	make install PREFIX=tools
+}

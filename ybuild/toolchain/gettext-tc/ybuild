@@ -1,0 +1,18 @@
+id='gettext-tc'
+orgid='gettext'
+version="$GETTEXT_VERSION"
+release='1'
+source=("$YSRC_URL/$orgid-$version.tar.xz")
+
+skippack=1
+
+build() {
+	cd $orgid-$version
+
+	./configure \
+		--disable-shared
+
+	make
+
+	cp -v gettext-tools/src/{msgfmt,msgmerge,xgettext} /tools/bin
+}

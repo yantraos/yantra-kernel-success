@@ -1,0 +1,19 @@
+id='python-tc'
+orgid='python'
+version="$PYTHON_VERSION"
+release='1'
+source=("$YSRC_URL/Python-$version.tar.xz")
+
+skippack=1
+
+build() {
+	cd Python-$version
+
+	sed -i '/def add_multiarch_paths/a \        return' setup.py
+
+	./configure --prefix=/tools --without-ensurepip
+
+	make
+
+	make install
+}

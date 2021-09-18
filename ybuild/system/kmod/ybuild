@@ -1,0 +1,33 @@
+id='kmod'
+version='26'
+release='1'
+about='Linux kernel module management tools and library'
+license='GPL3'
+url=''
+runtime=('glibc' 'openssl' 'xz' 'zlib' 'zstd')
+source=("$YSRC_URL/$id-$version.tar.xz")
+
+build() {
+    mkdir -vp $pkgdir/sbin $pkgdir/bin
+
+    cd $id-$version
+
+    ./configure --prefix=/usr          \
+            --bindir=/bin          \
+            --sysconfdir=/etc      \
+            --with-rootlibdir=/lib \
+            --with-xz              \
+            --with-zlib
+    
+
+    make
+
+    make DESTDIR=$pkgdir install
+    
+    for target in depmod insmod lsmod modinfo modprobe rmmod; do
+        ln -sfv ../bin/kmod $pkgdir/sbin/$target
+    done
+
+    ln -sfv kmod $pkgdir/bin/lsmod
+    ln -sfv libkmod.so $pkgdir/usr/lib/libkmod.so.2
+}

@@ -1,0 +1,30 @@
+id='bzip2'
+version='1.0.8'
+release='1'
+about='A high-quality data compression program'
+license='GPL3'
+url=''
+runtime=('glibc' 'bash')
+source=("$YSRC_URL/$id-$version.tar.gz
+	$YSRC_URL/$id-$version-install_docs-1.patch")
+
+build() {
+	mkdir -p $pkgdir/bin $pkgdir/lib  $pkgdir/usr/lib
+
+	cd $id-$version
+	patch -Np1 -i ../$id-$version-install_docs-1.patch
+	sed -i 's@\(ln -s -f \)$(PREFIX)/bin/@\1@' Makefile
+	sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile
+	make -f Makefile-libbz2_so || exit
+	make  clean
+	make 
+	make install PREFIX="$pkgdir/usr" || exit
+	
+	cp -v bzip2-shared $pkgdir/bin/bzip2
+	cp -av libbz2.so* $pkgdir/lib
+	ln -sv ../../lib/libbz2.so.1.0 $pkgdir/usr/lib/libbz2.so
+	ln -sv libbz2.so $pkgdir/usr/lib/libbz2.so.1.0
+	rm -v $pkgdir/usr/bin/{bunzip2,bzcat,bzip2}
+	ln -sv bzip2 $pkgdir/bin/bunzip2
+	ln -sv bzip2 $pkgdir/bin/bzcat
+}

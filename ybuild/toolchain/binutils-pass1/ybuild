@@ -1,0 +1,27 @@
+id='binutils-pass1'
+orgid='binutils'
+version="$BINUTILS_VERSION"
+release='1'
+source=("$YSRC_URL/$orgid-$version.tar.xz")
+skippack=1
+
+build() {
+	cd $orgid-$version
+	
+	mkdir -p build && cd build
+	
+	../configure --prefix=/tools \
+		--with-sysroot=$YDIR \
+		--with-lib-path=/tools/lib \
+		--target=$YTGT	\
+		--disable-nls	\
+		--disable-werror
+		
+	make
+	
+	case $(uname -m) in
+  		x86_64) mkdir -v /tools/lib && ln -sv lib /tools/lib64 ;;
+	esac
+	
+	make install
+}

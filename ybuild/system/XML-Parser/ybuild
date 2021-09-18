@@ -1,0 +1,17 @@
+id='XML-Parser'
+version='2.44'
+release='1'
+about='Expat-based XML parser module for perl'
+license='GPL3'
+runtime=('expat' 'perl')
+source=("$YSRC_URL/$id-$version.tar.gz")
+
+build() {
+    cd $id-$version
+    perl Makefile.PL
+    make
+    make test
+    make DESTDIR=$pkgdir install
+
+
+}

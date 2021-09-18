@@ -1,0 +1,32 @@
+id='e2fsprogs'
+version='1.45.3'
+release='1'
+about='Ext2/3/4 filesystem utilities'
+license='GPL3'
+runtime=('bash' 'systemd' 'util-linux')
+source=("$YSRC_URL/$id-$version.tar.gz")
+
+build() {
+	cd $id-$version 
+	mkdir -v build
+	cd       build
+	../configure --prefix=/usr           \
+		     --bindir=/bin           \
+		     --with-root-prefix=""   \
+		     --enable-elf-shlibs     \
+		     --disable-libblkid      \
+		     --disable-libuuid       \
+		     --disable-uuidd         \
+		     --disable-fsck
+	make
+	make check||true
+	make DESTDIR=$pkgdir install
+	make DESTDIR=$pkgdir install-libs
+	chmod -v u+w $pkgdir/usr/lib/{libcom_err,libe2p,libext2fs,libss}.a
+	gunzip -v $pkgdir/usr/share/info/libext2fs.info.gz
+	install-info --dir-file=$pkgdir/usr/share/info/dir $pkgdir/usr/share/info/libext2fs.info
+	makeinfo -o      doc/com_err.info ../lib/et/com_err.texinfo
+	install -v -m644 doc/com_err.info $pkgdir/usr/share/info
+	install-info --dir-file=$pkgdir/usr/share/info/dir $pkgdir/usr/share/info/com_err.info
+
+}

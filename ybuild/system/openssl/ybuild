@@ -1,0 +1,34 @@
+id='openssl'
+version='1.1.1c'
+release='1'
+about='The Open Source toolkit for Secure Sockets Layer and Transport Layer Security'
+license='GPL3'
+url=''
+runtime=('glibc' 'perl')
+source=("$YSRC_URL/$id-$version.tar.gz")
+
+
+build() {
+    cd $id-$version
+
+sed -i '/\} data/s/ =.*$/;\n    memset(\&data, 0, sizeof(data));/' \
+crypto/rand/rand_lib.c
+
+./config --prefix=/usr         \
+         --openssldir=/etc/ssl \
+         --libdir=lib          \
+         shared                \
+         zlib-dynamic
+
+
+    make
+
+    make test
+
+    sed -i '/INSTALL_LIBS/s/libcrypto.a libssl.a//' Makefile
+
+    make DESTDIR="$pkgdir" MANDIR=$pkgdir/usr/share/man MANSUFFIX=ssl install_sw install_ssldirs install_man_docs  install
+    mv -v $pkgdir/usr/share/doc/openssl $pkgdir/usr/share/doc/$id-$version
+    cp -vfr doc/* $pkgdir/usr/share/doc/$id-$version
+
+}

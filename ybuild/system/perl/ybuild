@@ -1,0 +1,27 @@
+id='perl'
+version='5.30.0'
+release='1'
+about='The Sed package contains a stream editor'
+license='GPL3'
+runtime=('gdbm' 'glibc')
+source=("$YSRC_URL/$id-$version.tar.xz")
+
+build() {
+    cd $id-$version
+
+    echo "127.0.0.1 localhost $(hostname)" > /etc/hosts
+
+    export BUILD_ZLIB=False
+    export BUILD_BZIP2=0   
+    sh Configure  -des -Dprefix=/usr              \
+                  -Dvendorprefix=/usr           \
+                  -Dman1dir=/usr/share/man/man1 \
+                  -Dman3dir=/usr/share/man/man3 \
+                  -Dpager="/usr/bin/less -isR"  \
+                  -Duseshrplib                  \
+                  -Dusethreads                  
+    make 
+    make -k test
+    make DESTDIR=$pkgdir install 
+    unset BUILD_ZLIB BUILD_BZIP2
+}

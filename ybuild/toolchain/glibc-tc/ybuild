@@ -1,0 +1,26 @@
+id='glibc-tc'
+orgid='glibc'
+version="$GLIBC_VERSION"
+release='1'
+about='GNU libc library'
+license='GPL LGPL'
+url='https://www.gnu.org/software/libc'
+source=("$YSRC_URL/$orgid-$version.tar.xz")
+skippack=1
+
+build() {
+    cd $orgid-$version
+
+    mkdir -pv build && cd build
+
+    ../configure     \
+        --prefix=/tools \
+        --host=$YTGT    \
+        --build=$(../scripts/config.guess) \
+        --enable-kernel=3.2 \
+        --with-headers=/tools/include
+
+    make
+
+    make install
+}

@@ -1,0 +1,21 @@
+id='bc'
+version='2.1.3'
+release='1'
+about='An arbitrary precision calculator language'
+license='GPL3'
+url=''
+runtime=('readline')
+source=("$YSRC_URL/$id-$version.tar.gz")
+
+build() {
+    cd $id-$version
+
+    PREFIX=/usr CC=gcc CFLAGS="-std=c99"  \
+        ./configure.sh -G -O3
+
+    make
+
+    make test
+
+    make DESTDIR=$pkgdir install
+}

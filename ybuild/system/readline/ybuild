@@ -1,0 +1,37 @@
+id='readline'
+version='8.0'
+release='1'
+about='libraries that offers command-line editing and history capabilities'
+license=''
+url=''
+runtime=()
+source=("$YSRC_URL/$id-$version.tar.gz")
+
+build() {
+    mkdir -p $pkgdir/lib
+
+    cd $id-$version
+
+    sed -i '/MV.*old/d' Makefile.in
+    sed -i '/{OLDSUFF}/c:' support/shlib-install
+
+    ./configure \
+        --prefix=/usr   \
+        --disable-static \
+        --docdir=/usr/share/doc/$id-$version
+
+    if [[ -d /tools ]] ; then
+        SHLIB_LIBS="-L/tools/lib -lncursesw"
+    fi
+
+    make SHLIB_LIBS=$SHLIB_LIBS
+
+    make DESTDIR=$pkgdir install SHLIB_LIBS=$SHLIB_LIBS
+
+    mv -v $pkgdir/usr/lib/lib{readline,history}.so.* $pkgdir/lib
+    chmod -v u+w $pkgdir/lib/lib{readline,history}.so.*
+    ln -sfv ../../lib/$(readlink $pkgdir/usr/lib/libreadline.so) $pkgdir/usr/lib/libreadline.so
+    ln -sfv ../../lib/$(readlink $pkgdir/usr/lib/libhistory.so ) $pkgdir/usr/lib/libhistory.so
+
+    install -v -m644 doc/*.{ps,pdf,html,dvi} $pkgdir/usr/share/doc/$id-$version
+}

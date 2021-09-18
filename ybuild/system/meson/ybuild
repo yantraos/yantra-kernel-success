@@ -1,0 +1,16 @@
+id='meson'
+version='0.51.1'
+release='1'
+about='High productivity build system'
+license='GPL3'
+runtime=('ninja')
+source=("$YSRC_URL/$id-$version.tar.gz")
+
+build() {
+    	cd $id-$version
+
+	python3 setup.py build
+
+	python3 setup.py install \
+		--prefix=/usr --root=$pkgdir --optimize=1
+}

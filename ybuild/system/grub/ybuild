@@ -1,0 +1,23 @@
+id='grub'
+version='2.04'
+release='1'
+about='GNU GRand Unified Bootloader (2)'
+license='GPL3'
+runtime=('gettext' 'gcc' 'bash' 'xz')
+source=("$YSRC_URL/$id-$version.tar.xz")
+
+build() {
+    mkdir -p $pkgdir/usr/share/bash-completion/completions
+
+    cd $id-$version
+
+    ./configure --prefix=/usr          \
+            --sbindir=/sbin        \
+            --sysconfdir=/etc      \
+            --disable-efiemu       \
+            --disable-werror
+    make
+    make DESTDIR=$pkgdir install
+    mv -v $pkgdir/etc/bash_completion.d/grub $pkgdir/usr/share/bash-completion/completions
+
+}

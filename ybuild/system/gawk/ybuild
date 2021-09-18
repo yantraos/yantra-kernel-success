@@ -1,0 +1,22 @@
+id='gawk'
+version='5.0.1'
+release='1'
+about='GNU version of awk'
+license='GPL3'
+runtime=('glibc' 'mpfr' 'bash')
+source=("$YSRC_URL/$id-$version.tar.xz")
+
+build() {
+    cd $id-$version
+
+   sed -i 's/extras//' Makefile.in
+    ./configure --prefix=/usr
+    make
+    make check||true
+    make DESTDIR=$pkgdir install
+    mkdir -vp $pkgdir/usr/share/doc/$id-$version
+    cp    -v doc/{awkforai.txt,*.{eps,pdf,jpg}} $pkgdir/usr/share/doc/$id-$version
+
+
+
+}

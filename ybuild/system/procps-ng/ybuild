@@ -1,0 +1,28 @@
+id='procps-ng'
+version='3.3.15'
+release='1'
+about='Package compiler and linker metadata toolkit'
+license='GPL3'
+runtime=('glibc' 'bash')
+source=("$YSRC_URL/$id-$version.tar.xz")
+
+build() {
+	mkdir -p $pkgdir/lib
+	cd $id-$version
+	./configure --prefix=/usr                            \
+		    --exec-prefix=                           \
+		    --libdir=/usr/lib                        \
+		    --docdir=/usr/share/doc/$id-$version     \
+		    --disable-static                         \
+		    --disable-kill                           \
+		    --with-systemd
+	make
+	sed -i -r 's|(pmap_initname)\\\$|\1|' testsuite/pmap.test/pmap.exp
+	sed -i '/set tty/d' testsuite/pkill.test/pkill.exp
+	rm testsuite/pgrep.test/pgrep.exp
+	make check||true
+	make DESTDIR=$pkgdir install
+	mv -v $pkgdir/usr/lib/libprocps.so.* $pkgdir/lib
+	ln -sfv ../../lib/$(readlink $pkgdir/usr/lib/libprocps.so) $pkgdir/usr/lib/libprocps.so
+	ln -sfv libprocps.so $pkgdir/usr/lib/libprocps.so.7
+}

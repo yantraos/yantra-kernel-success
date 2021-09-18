@@ -1,0 +1,15 @@
+id='bzip2-tc'
+orgid='bzip2'
+version="$BZIP2_VERSION"
+release='1'
+source=("$YSRC_URL/$orgid-$version.tar.gz")
+
+skippack=1
+
+build() {
+	cd $orgid-$version
+
+	make
+	make install PREFIX=/tools
+
+}

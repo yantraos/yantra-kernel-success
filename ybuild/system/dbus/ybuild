@@ -1,0 +1,28 @@
+id='dbus'
+version='1.12.16'
+release='1'
+about='Freedesktop.org message bus system'
+license='GPL3'
+runtime=('expat')
+source=("$YSRC_URL/$id-$version.tar.gz")
+
+build() {
+	mkdir -p $pkgdir/lib
+
+	cd $id-$version   
+	./configure --prefix=/usr                       \
+		--sysconfdir=/etc                   \
+		--localstatedir=/var                \
+		--disable-static                    \
+		--disable-doxygen-docs              \
+		--disable-xml-docs                  \
+		--docdir=/usr/share/doc/$id-$version \
+		--with-console-auth-dir=/run/console
+
+	make
+	make DESTDIR=$pkgdir install 
+	mv -v $pkgdir/usr/lib/libdbus-1.so.* $pkgdir/lib
+	ln -sfv ../../lib/$(readlink $pkgdir/usr/lib/libdbus-1.so) $pkgdir/usr/lib/libdbus-1.so
+	ln -sfv /etc/machine-id $pkgdir/var/lib/dbus
+
+}

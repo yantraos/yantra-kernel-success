@@ -1,0 +1,19 @@
+id='bison'
+version='3.4.1'
+release='1'
+about='The GNU general-purpose parser generator'
+license='GPL3'
+runtime=('glibc' 'm4' 'bash')
+source=("$YSRC_URL/$id-$version.tar.xz")
+
+build() {
+    cd $id-$version
+
+    sed -i '6855 s/mv/cp/' Makefile.in
+    
+    ./configure --prefix=/usr --docdir=/usr/share/doc/$id-$version
+
+    make -j1
+    make DESTDIR=$pkgdir install 
+
+}

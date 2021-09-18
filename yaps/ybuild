@@ -1,0 +1,19 @@
+id=acl
+version=0.28
+release=1
+source=("http://some.url/$name-$version.tar.gz"
+        "a.patch")
+
+runtime=(glibc attr)
+buildtime=(autconf gcc make automake)
+
+build() {
+    cd $name-$version
+
+    ./configure --prefix=/usr
+
+    make
+
+    make install DESTDIR=$pkg
+    
+}

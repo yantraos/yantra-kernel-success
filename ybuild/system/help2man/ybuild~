@@ -1,0 +1,15 @@
+id='help2man'
+version='5.2.4'
+release='1'
+about='help 2 man pages'
+license='GPL3'
+runtime=('bash')
+source=("https://ftp.gnu.org/gnu/help2man/help2man-1.021.tar.gz")
+
+build() {
+    cd $id-$version
+    ./configure --prefix=/usr   
+    make
+    make DESTDIR=$pkgdir install 
+}
+

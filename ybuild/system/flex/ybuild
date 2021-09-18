@@ -1,0 +1,20 @@
+id='flex'
+version='2.6.4'
+release='1'
+about='A tool for generating text-scanning programs'
+license='GPL3'
+runtime=('glibc'  'm4' 'bash')
+source=("$YSRC_URL/$id-$version.tar.gz")
+
+build() {
+    cd $id-$version
+
+    sed -i "/math.h/a #include <malloc.h>" src/flexdef.h
+    HELP2MAN=/tools/bin/true   ./configure --prefix=/usr --docdir=/usr/share/doc/$d-$version
+    make
+    make check||true
+    make DESTDIR=$pkgdir install 
+    mkdir -vp $pkgdir/usr/bin
+    ln -sv flex $pkgdir/usr/bin/lex
+}
+

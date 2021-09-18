@@ -1,0 +1,23 @@
+id='coreutils-tc'
+orgid='coreutils'
+version="$COREUTILS_VERSION"
+release='1'
+source=("$YSRC_URL/$orgid-$version.tar.xz")
+
+skippack=1
+
+build() {
+	cd $orgid-$version
+
+	FORCE_UNSAFE_CONFIGURE=1 \
+	./configure \
+		--prefix=/tools \
+		--enable-install-program=hostname
+
+	make
+
+	#make RUN_EXPENSIVE_TESTS=yes check
+
+	make install
+
+}

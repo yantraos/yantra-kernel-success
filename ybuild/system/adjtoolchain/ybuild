@@ -1,0 +1,39 @@
+id='adjtoolchain'
+version='1'
+release='1'
+about='Adjusting the Toolchain'
+
+build() {
+	mkdir -p $pkgdir
+	touch $pkgdir/patched-toolchain
+	
+	[[ -e /tools/patched-toolchain ]] || {
+                echo "adjusting toolchain"
+                mv -v /tools/bin/{ld,ld-old}
+                mv -v /tools/$(uname -m)-pc-linux-gnu/bin/{ld,ld-old}
+                mv -v /tools/bin/{ld-new,ld}
+                ln -sv /tools/bin/ld /tools/$(uname -m)-pc-linux-gnu/bin/ld
+
+                gcc -dumpspecs | sed -e 's@/tools@@g'                   \
+		    -e '/\*startfile_prefix_spec:/{n;s@.*@/usr/lib/ @}' \
+		    -e '/\*cpp:/{n;s@$@ -isystem /usr/include@}' >      \
+		    `dirname $(gcc --print-libgcc-file-name)`/specs
+
+                touch /tools/patched-toolchain
+            }
+
+	echo "testing toolchain"
+        echo 'int main(){}' > dummy.c
+
+        cc dummy.c -v -Wl,--verbose &> dummy.log
+            if [[ $(readelf -l a.out | grep ': /lib' | xargs) != '[Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]' ]] ; then
+                echo 'Toolchain interpreter fail' > /tools/tc-test-fail
+                exit 1
+            fi
+            grep -o '/usr/lib.*/crt[1in].*succeeded' dummy.log || tee /tools/tc-test-fail
+            grep -B1 '^ /usr/include' dummy.log || tee /tools/tc-test-fail
+            grep 'SEARCH.*/usr/lib' dummy.log |sed 's|; |\n|g' || tee /tools/tc-test-fail
+            grep "/lib.*/libc.so.6 " dummy.log || tee /tools/tc-test-fail
+            grep found dummy.log || tee /tools/tc-test-fail
+            rm -v dummy.c a.out dummy.log
+}

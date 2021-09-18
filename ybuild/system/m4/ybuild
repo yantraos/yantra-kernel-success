@@ -1,0 +1,23 @@
+id='m4'
+version='1.4.18'
+release='1'
+about='M4 macro processor'
+license='GPL3'
+url=''
+runtime=('bash' 'glibc')
+source=("$YSRC_URL/$id-$version.tar.xz")
+
+build() {
+    cd $id-$version
+
+    sed -i 's/IO_ftrylockfile/IO_EOF_SEEN/' lib/*.c
+    echo "#define _IO_IN_BACKUP 0x100" >> lib/stdio-impl.h
+    
+    ./configure --prefix=/usr
+
+    make
+
+    make check
+
+    make DESTDIR=$pkgdir install
+}

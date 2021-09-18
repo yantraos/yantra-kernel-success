@@ -1,0 +1,13 @@
+id='man-pages'
+version='5.02'
+release='1'
+about='Linux man pages'
+license='GPL3'
+url=''
+runtime=('')
+source=("$YSRC_URL/$id-$version.tar.xz")
+
+build() {
+    cd $id-$version
+    make DESTDIR=$pkgdir install
+}

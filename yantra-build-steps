@@ -1,0 +1,62 @@
+yantra system steps
+====================
+
+1.take host system ubuntu 18.04.5
+
+cd yantra-9.0/ybuild
+
+./check.sh
+
+need to install host system requirements follow below steps
+
+2.linking /bin/sh to /bin/bash
+
+rm /bin/sh
+
+ln -s /bin/bash /bin/sh
+
+3.installing Bison
+
+apt-get install bison -y
+
+4.install with  gawk 
+
+apt-get install gawk -y
+
+rm /usr/bin/awk 
+
+ln -s /usr/bin/gawk /usr/bin/awk
+
+5.gcc and g++
+
+apt-get install gcc g++ make -y
+
+6. install texinfo
+
+sudo apt-get install texinfo -y
+
+7. install libssl-dev
+
+sudo apt-get install libssl-dev -y
+
+8.install pkg-config
+
+sudo apt-get install pkg-config -y
+
+9. install  yaps in hostsystem
+
+cd yantra-9.0/yaps 
+sudo make install PREFIX=usr
+
+cd yantra-9.0/ybuild
+
+./check.sh
+
+cd yantra-9.0/ybuild
+sudo ./build.sh
+
+after build toiol chain successfull if we need to run ./build.sh second time
+
+sudo NO_BACKUP=1 ./build.sh
+
+

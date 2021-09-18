@@ -1,0 +1,27 @@
+id='openssl-tc'
+orgid='openssl'
+version="$OPENSSL_VERSION"
+release='1'
+source=("$YSRC_URL/$orgid-$version.tar.gz")
+
+skippack=1
+
+build() {
+	cd $orgid-$version
+
+	sed -i '/\} data/s/ =.*$/;\n    memset(\&data, 0, sizeof(data));/' \
+  		crypto/rand/rand_lib.c
+
+	./config \
+		--prefix=/tools \
+		--openssldir=/tools/etc/ssl \
+		--libdir=lib \
+		shared \
+		no-ssl3-method
+	make
+
+	#make test
+
+	#sed -i '/INSTALL_LIBS/s/libcrypto.a libssl.a//' Makefile
+	make MANSUFFIX=ssl install -j1
+}
