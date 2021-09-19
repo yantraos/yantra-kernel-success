@@ -1,0 +1,94 @@
+yantra system steps
+====================
+1.take host system ubuntu 18.04.5 
+whil install ubuntu we need to select partion type something else(plz find picture)
+
+i have taken like below
+=========================
+ 
+vm size vmdk  100gb
+plze select bridgenetwork for vm
+
+
+for ubuntu
+===========
+root=20gb  /dev/sda1
+swap=4gb   /dev/sda2
+
+for yantra
+==========
+4gb for swap only select ext4 filesystem(dont allocat swap while install)
+remaining for yantra root *only select ext4 file ststem(dont allocate root while installing)
+
+
+sudo mkfs -v -t ext4 /dev/sda8
+
+sudo mkswap /dev/sda7
+
+export YDIR=/mnt/yantra 
+sudo mkdir -pv $YDIR 
+please change also in yaps.build.conf  file in ybuild dirctory,
+
+export YDIR=/mnt/yantra  
+sudo mount -v -t ext4 /dev/sda8 $YDIR
+sudo /sbin/swapon -v /dev/sda7
+
+
+
+2. cd yantra-9.0/ybuild
+
+./check.sh
+
+3. install host system requirements
+
+sudo rm /bin/sh
+
+sudo ln -s /bin/bash /bin/sh
+
+sudo apt-get install bison gawk gcc g++ make texinfo libssl-dev pkg-config git openssh-server net-tools -y
+
+
+sudo rm /usr/bin/awk 
+
+sudo ln -svf /usr/bin/gawk /usr/bin/awk
+
+cd yaps
+
+sudo make install PREFIX=usr
+
+cd ybuild
+
+./check.sh
+
+make install PREFIX=usr
+
+sudo ./system-build.sh
+
+
+after build tool chain successfull if we need to run ./build.sh second time
+
+sudo NO_BACKUP=1 ./build.sh
+
+
+after all packages build successfully
+
+sudo grub-install /dev/sda
+
+
+
+cat > /boot/grub/grub.cfg << "EOF"
+# Begin /boot/grub/grub.cfg
+set default=0
+set timeout=5
+
+insmod ext2
+set root=(hd0,7)
+
+menuentry "GNU/Linux, Yantra" {
+        linux   /boot/vmlinuz-5.2.8 root=/dev/sda7 ro
+}
+EOF
+
+
+sudo update-grub
+
