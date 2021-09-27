@@ -1,0 +1,237 @@
+iso-bios genrate steps
+======================
+
+install related dependencies cpio, cdrtools, dvd_wr_tools, git,
+
+
+
+
+1.install aufs tools
+====================
+
+http://lists.linuxfromscratch.org/pipermail/hints/2020-March/003335.html
+
+   cd /source
+git clone git://github.com/sfjro/aufs5-standalone.git \aufs5-standalone.git
+	git clone git://github.com/sfjro/aufs5-standalone.git aufs5-standalone.git
+	cd aufs5-standalone.git
+git checkout origin/aufs5.5
+git checkout origin/aufs5.5
+
+cp aufs5-*.patch ..
+rm -f include/uapi/linux/Kbuild
+#tar cvfz $LFS/sources/aufs5.tar.gz Documentation fs include 
+tar cvfz ../aufs5.tar.gz Documentation fs include 
+rm -rf aufs5-standalone.git
+#------------ Cut and Paste end
+
+2.Rebuilding your kernel
+======================
+
+    Follow the instructions in the LFS/BLFS book and build your LFS 
+system
+as you normally would except that during the kernel build, after 
+unpacking
+the source and cd'ing into the linux directory, you apply either
+the unionfs or the aufs patches.
+
+
+To apply aufs patches:
+#------------ Cut and Paste start
+wget https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.5.7.tar.xz
+cd linux-5.5.7
+cat ../aufs5-base.patch  |patch -Np1
+cat ../aufs5-kbuild.patch  |patch -Np1
+cat ../aufs5-mmap.patch  |patch -Np1
+cat ../aufs5-standalone.patch  |patch -Np1
+tar xvf ../aufs5.tar.gz
+#------------ Cut and Paste end
+
+When you configure the kernel, make sure the following are enabled
+as builtins (not as modules):
+
+    SQUASHFS support (and support for SQUASHFS XZ compressed file 
+systems).
+    UNIONFS or AUFS support (CONFIG_AUFS_FS=y)
+    CDROM support (ISO9660).
+    DEVTMPFS support.
+
+Then build and install as normal:
+
+
+
+#------------ Cut and Paste start
+
+make menuconfig  (CONFIG_AUFS_FS=y)
+make
+make modules_install
+cp arch/x86/boot/bzImage /boot/vmlinuz-5.5.7
+cp .config /boot/config-5.5.7          ***VERY VERY IMPORTANT TO HAVE 
+A BACKUP OF YOUR KERNEL CONFIGURATION***
+
+
+
+
+3.install squashfs tool both host and chroot
+=============================================
+wget https://sourceforge.net/projects/squashfs/files/squashfs/squashfs4.4/squashfs4.4.tar.gz
+cd $LFS/sources
+tar xvfz squashfs4.4.tar.gz
+cd squashfs4.4/squashfs-tools
+Edit Makefile as follows:
+XZ_SUPPORT = 1
+COMP_DEFAULT = xz
+#sudo apt install liblzma-dev
+sudo apt-get install libz-dev
+
+make
+sudo make install
+mksquashfs -version
+
+
+
+4.install busybox in chroot
+===========================
+
+wget https://busybox.net/downloads/busybox-1.31.1.tar.bz2
+
+**(busybox-glibc-2.31.patch)**
+
+https://708350.bugs.gentoo.org/attachment.cgi?id=611780
+
+cd /sources
+tar xvf busybox-1.31.1.tar.bz2
+cd busybox-1.31.1
+cat ../busybox-glibc-2.31.patch | patch -Np1
+make defconfig
+sed 's/# CONFIG_STATIC is not set/CONFIG_STATIC=y/' -i .config
+sed 's/CONFIG_FEATURE_HAVE_RPC=y/# CONFIG_FEATURE_HAVE_RPC is not set/' -i .config
+sed 's/CONFIG_FEATURE_MOUNT_NFS=y/# CONFIG_FEATURE_MOUNT_NFS is not set/' -i .config
+sed 's/CONFIG_FEATURE_INETD_RPC=y/# CONFIG_FEATURE_INETD_RPC is not set/' -i .config
+make
+make install
+cp -v busybox /bin
+
+
+4.Create ramdisk.
+=================
+https://bitbucket.org/chandrakantsingh/aryalinux/raw/2b8cfe6cebdb7bc1f8d05dfddc60c6da68adf6d8/base-system/mkliveinitramfs.sh
+
+
+to create ram disk need initscrpt (init.sh)
+https://bitbucket.org/chandrakantsingh/aryalinux/src/master/base-system/init.sh
+
+cd /sources
+echo "Yantra Linux" >id_label
+mkdir -pv mnt_init/{bin,boot}
+cp -v id_label mnt_init/boot
+cp -v /mnt/yantra/bin/busybox mnt_init/bin
+cp init.sh mnt_init/init
+sed -i "s/<ARCH>/$(uname -m)/g" mnt_init/init
+chmod +x mnt_init/init
+
+pushd mnt_init
+find . | ./bin/busybox cpio -o -H newc -F ../initramfs.cpio
+popd
+gzip -9 initramfs.cpio
+rm -rf mnt_init
+mv initramfs.cpio.gz /mnt/yantra/boot/initram.fs
+mv id_label /mnt/yantra/boot
+
+
+5.root.sfs (before create root.sfs please unmount only 
+#umount -v $LFS/dev/pts
+#umount -v $LFS/dev
+#umount -v $LFS/run
+#umount -v $LFS/proc
+#umount -v $LFS/sys dont umount -v $LFS)
+
+#rm -f $LFS/sources/root.sfs
+#sudo mksquashfs $LFS $LFS/sources/root.sfs -b 1048576 -comp xz -Xdict-size 100% -e $LFS/sources -e $LFS/var/cache/alps/sources/* -e $LFS/tools -e $LFS/etc/fstab
+
+
+mksquashfs /mnt/yantra /mnt/yantra/source/root.sfs -b 1048576 -comp xz -Xdict-size 100% -e /mnt/yantra/source -e /mnt/yantra/ybuild  -e /mnt/yantra/yaps -e /mnt/yantra/isopkg -e /mnt/yantra/iso-steps  -e /mnt/yantra/yantra* -e /mnt/yantra/tools -e /mnt/yantra/etc/fstab -e /mnt/yantra/initramfs.cpio  -e /mnt/yantra/chroot
+
+
+
+6.create directories below structure
+
+mkdir -pv live/boot live/isolinux live/yantra
+
+
+
+7.syslinux
+==========
+wget http://www.kernel.org/pub/linux/utils/boot/syslinux/syslinux-4.06.tar.xz
+cd syslinux-4.06
+echo "yantraLinux Live" >id_label
+cp -v id_label live/isolinux
+cp -v syslinux-4.06/core/isolinux.bin live/isolinux
+cp -v syslinux-4.06/com32/menu/menu.c32 live/isolinux
+
+cat > live/isolinux/isolinux.cfg << EOF
+DEFAULT menu.c32
+PROMPT 0
+MENU TITLE Select an option to boot Yantralinux
+TIMEOUT 300
+
+LABEL slientlive
+    MENU LABEL $LABEL
+    MENU DEFAULT
+    KERNEL /isolinux/vmlinuz
+    APPEND initrd=initram.fs quiet splash
+LABEL debuglive
+    MENU LABEL $LABEL Debug Mode
+    KERNEL /isolinux/vmlinuz
+    APPEND initrd=initram.fs
+EOF
+
+
+
+8.host system
+=============
+cp -v /sources/root.sfs live/yantra/
+cp -v `ls /mnt/yantra/boot/vmlinuz*`   live/isolinux/vmlinuz
+cp -v /mnt/yantra/boot/initram.fs live/isolinux/
+
+live/boot/grub.cfg 
+
+set default="0"
+set timeout="30"
+set hidden_timeout_quiet=false
+
+menuentry "Yantra Linux"{
+  echo "Loading Yantra Linux.  Please wait..."
+  linux /isolinux/vmlinuz quiet splash
+  initrd /isolinux/initram.fs
+}
+
+menuentry "Yantra Linux"{
+  echo "Loading Yantra Linux in debug mode.  Please wait..."
+  linux /isolinux/vmlinuz
+  initrd /isolinux/initram.fs
+}
+
+cp -v /mnt/yantra/boot/vmlinuz-5.5.7  live/boot/
+cp -v /mnt/yantra/boot/initramfs live/boot/
+
+echo "YantraLinux Live" > live/isolinux/id_label
+
+
+genisoimage -o yantra.iso               \
+          -b boot/isolinux/isolinux.bin \
+          -c boot.cat                   \
+          -no-emul-boot                 \
+          -boot-load-size 4             \
+          -boot-info-table              \
+          -joliet -l -R                 \
+          live
+
+
+
+mkisofs -o yantra8.iso -R -J -A "$LABEL" -hide-rr-moved -v -d -N -no-emul-boot -boot-load-size 4 -boot-info-table -b isolinux/isolinux.bin -c isolinux/isolinux.boot -no-emul-boot -V "YANTRALIVE" live
+
+
+#mkisofs -o $LFS/sources/$OUTFILE yantra.iso -R -J -A "$LABEL" -hide-rr-moved -v -d -N -no-emul-boot -boot-load-size 4 -boot-info-table -b isolinux/isolinux.bin -c isolinux/isolinux.boot -eltorito-alt-boot -no-emul-boot -eltorito-platform 0xEF -eltorito-boot isolinux/efiboot.img -V "ARYALIVE" live
+isohybrid -u $LFS/sources/$OUTFILE
+else
