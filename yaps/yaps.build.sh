@@ -16,7 +16,7 @@ COMPRESS=${COMPRESS:-"xz"}
 EXTENSION=${EXTENSION:-"yaps"} # acl-1.07.1-1.yaps
 COMPILER_SPECS=${COMPILER_SPECS:-"/etc/yaps.build.conf"}
 
-export YSOURCEURL=${YSOURCEURL:-"http://35.154.131.43/ysarchives/"}
+export YSOURCEURL=${YSOURCEURL:-"http://3.109.132.140/ysarchives/"}
 export YSRC_VERSION=${YSRC_VERSION:-'0.1'}
 
 
