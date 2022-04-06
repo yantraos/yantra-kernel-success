@@ -2,7 +2,7 @@ id='wget-tc'
 orgid='wget'
 version="$WGET_VERSION"
 release='1'
-source=("http://35.154.131.43/ysarchives/1.0/NET/$orgid-$version.tar.gz")
+source=("http://3.109.132.140/ysarchives/1.0/NET/$orgid-$version.tar.gz")
 
 skippack=1
 
